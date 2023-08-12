@@ -4,13 +4,17 @@ import { useState, useEffect } from "react";
 import { Alert } from "./utils/alert";
 import { EmployeeService } from "./services/employees.services";
 
+const initialEmployeeState = {
+  id: "",
+  nombre: "",
+  edad: "",
+  pais: "",
+  cargo: "",
+  anios: "",
+};
+
 function App() {
-  const [nombre, setNombre] = useState("");
-  const [edad, setEdad] = useState();
-  const [pais, setPais] = useState("");
-  const [cargo, setCargo] = useState("");
-  const [anios, setAnios] = useState();
-  const [id, setId] = useState();
+  const [employee, setEmployee] = useState(initialEmployeeState);
 
   const [editar, setEditar] = useState(false);
 
@@ -20,29 +24,25 @@ function App() {
     getListEmployees();
   }, []);
 
-  const getEmployee = () => {
-    const employee = {
-      id: id,
-      nombre: nombre,
-      edad: edad,
-      pais: pais,
-      cargo: cargo,
-      anios: anios,
-    };
+  const handleChangeForm = (event) => {
+    const { value, name } = event.target;
 
-    return employee;
+    setEmployee({
+      ...employee,
+      [name]: value,
+    });
   };
 
   const addEmployee = async () => {
     try {
-      await EmployeeService.add(getEmployee());
+      await EmployeeService.add(employee);
 
       getListEmployees();
-      limpiarCampos();
+      cleanFiles();
 
       Alert.showSuccess(
         "<strong>Registro Exitoso!</strong>",
-        `<i>El empleado <strong>${nombre}</strong> fue registrado con éxito</i>`
+        `<i>El empleado <strong>${employee.nombre}</strong> fue registrado con éxito</i>`
       );
     } catch (error) {
       Alert.showError("No se logró registrar el empleado!");
@@ -50,15 +50,10 @@ function App() {
     }
   };
 
-  const editEmployeeo = (val) => {
+  const editEmployee = (employee) => {
     setEditar(true);
 
-    setNombre(val.nombre);
-    setEdad(val.edad);
-    setPais(val.pais);
-    setCargo(val.cargo);
-    setAnios(val.anios);
-    setId(val.id);
+    setEmployee(employee);
   };
 
   const getListEmployees = async () => {
@@ -68,14 +63,14 @@ function App() {
 
   const updateEmployee = async () => {
     try {
-      await EmployeeService.update(getEmployee());
+      await EmployeeService.update(employee);
 
       getListEmployees();
-      limpiarCampos();
+      cleanFiles();
 
       Alert.showSuccess(
         "<strong>Actualización Exitosa!</strong>",
-        `<i>El empleado <strong>${nombre}</strong> fue actualizado con éxito</i>`
+        `<i>El empleado <strong>${employee.nombre}</strong> fue actualizado con éxito</i>`
       );
     } catch (error) {
       Alert.showError("No se logró actualizar el empleado!");
@@ -94,7 +89,7 @@ function App() {
       await EmployeeService.delete(employee.id);
 
       getListEmployees();
-      limpiarCampos();
+      cleanFiles();
 
       Alert.showSuccess(
         `El empleado <strong>${employee.nombre}</strong> fue eliminado con éxito`
@@ -105,13 +100,8 @@ function App() {
     }
   };
 
-  const limpiarCampos = () => {
-    setNombre("");
-    setEdad("");
-    setPais("");
-    setCargo("");
-    setAnios("");
-    setId("");
+  const cleanFiles = () => {
+    setEmployee(initialEmployeeState);
     setEditar(false);
   };
 
@@ -127,14 +117,12 @@ function App() {
             </span>
             <input
               type="text"
-              onChange={(event) => {
-                setNombre(event.target.value);
-              }}
+              onChange={handleChangeForm}
               className="form-control"
-              value={nombre}
+              value={employee.nombre}
               placeholder="Ingrese un nombre"
-              aria-label="Username"
-              aria-describedby="basic-addon1"
+              name="nombre"
+              aria-label="Nombre"
             />
           </div>
 
@@ -144,14 +132,12 @@ function App() {
             </span>
             <input
               type="number"
-              onChange={(event) => {
-                setEdad(event.target.value);
-              }}
+              onChange={handleChangeForm}
               className="form-control"
-              value={edad}
+              value={employee.edad}
               placeholder="Ingrese su edad"
-              aria-label="Username"
-              aria-describedby="basic-addon1"
+              name="edad"
+              aria-label="Edad"
             />
           </div>
 
@@ -161,14 +147,12 @@ function App() {
             </span>
             <input
               type="text"
-              onChange={(event) => {
-                setPais(event.target.value);
-              }}
+              onChange={handleChangeForm}
               className="form-control"
-              value={pais}
+              value={employee.pais}
               placeholder="Ingrese un país"
-              aria-label="Username"
-              aria-describedby="basic-addon1"
+              name="pais"
+              aria-label="Pais"
             />
           </div>
 
@@ -178,14 +162,12 @@ function App() {
             </span>
             <input
               type="text"
-              onChange={(event) => {
-                setCargo(event.target.value);
-              }}
+              onChange={handleChangeForm}
               className="form-control"
-              value={cargo}
+              value={employee.cargo}
               placeholder="Ingrese un cargo"
-              aria-label="Username"
-              aria-describedby="basic-addon1"
+              name="cargo"
+              aria-label="Cargo"
             />
           </div>
 
@@ -195,13 +177,12 @@ function App() {
             </span>
             <input
               type="number"
-              onChange={(event) => {
-                setAnios(event.target.value);
-              }}
+              onChange={handleChangeForm}
               className="form-control"
-              value={anios}
+              value={employee.anios}
               placeholder="Ingrese un nombre"
-              aria-label="Username"
+              name="anios"
+              aria-label="Anios"
               aria-describedby="basic-addon1"
             />
           </div>
@@ -213,7 +194,7 @@ function App() {
               <button className="btn btn-warning m-2" onClick={updateEmployee}>
                 Actualizar
               </button>
-              <button className="btn btn-danger m-2" onClick={limpiarCampos}>
+              <button className="btn btn-danger m-2" onClick={cleanFiles}>
                 Cancelar
               </button>
             </div>
@@ -238,15 +219,15 @@ function App() {
           </tr>
         </thead>
         <tbody>
-          {empleadosList.map((val, key) => {
+          {empleadosList.map((employee, key) => {
             return (
-              <tr key={val.id}>
-                <th scope="row">{val.id} </th>
-                <td>{val.nombre} </td>
-                <td>{val.edad} </td>
-                <td>{val.pais} </td>
-                <td>{val.cargo} </td>
-                <td>{val.anios} </td>
+              <tr key={employee.id}>
+                <th scope="row">{employee.id} </th>
+                <td>{employee.nombre} </td>
+                <td>{employee.edad} </td>
+                <td>{employee.pais} </td>
+                <td>{employee.cargo} </td>
+                <td>{employee.anios} </td>
                 <td>
                   <div
                     className="btn-group"
@@ -256,7 +237,7 @@ function App() {
                     <button
                       type="button"
                       onClick={() => {
-                        editEmployeeo(val);
+                        editEmployee(employee);
                       }}
                       className="btn btn-info"
                     >
@@ -265,7 +246,7 @@ function App() {
                     <button
                       type="button"
                       onClick={() => {
-                        deleteEmp(val);
+                        deleteEmp(employee);
                       }}
                       className="btn btn-danger"
                     >
