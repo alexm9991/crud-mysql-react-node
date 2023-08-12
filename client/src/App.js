@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useState, useEffect } from "react";
 import { Alert } from "./utils/alert";
 import { EmployeeService } from "./services/employees.services";
+import { TableEmployees } from "./components/table-employees.components";
 
 const initialEmployeeState = {
   id: "",
@@ -16,9 +17,9 @@ const initialEmployeeState = {
 function App() {
   const [employee, setEmployee] = useState(initialEmployeeState);
 
-  const [editar, setEditar] = useState(false);
+  const [edit, setedit] = useState(false);
 
-  const [empleadosList, setEmpleados] = useState([]);
+  const [employeesList, setEmployeesList] = useState([]);
 
   useEffect(() => {
     getListEmployees();
@@ -51,14 +52,14 @@ function App() {
   };
 
   const editEmployee = (employee) => {
-    setEditar(true);
+    setedit(true);
 
     setEmployee(employee);
   };
 
   const getListEmployees = async () => {
     const { data } = await EmployeeService.getList();
-    setEmpleados(data);
+    setEmployeesList(data);
   };
 
   const updateEmployee = async () => {
@@ -78,7 +79,7 @@ function App() {
     }
   };
 
-  const deleteEmp = async (employee) => {
+  const deleteEmployee = async (employee) => {
     const { isConfirmed } = await Alert.showConfirm(
       `Desea borrar el empleado <strong>${employee.nombre}</strong> ?`
     );
@@ -102,7 +103,7 @@ function App() {
 
   const cleanFiles = () => {
     setEmployee(initialEmployeeState);
-    setEditar(false);
+    setedit(false);
   };
 
   return (
@@ -189,7 +190,7 @@ function App() {
         </div>
 
         <div className="card-footer text-muted">
-          {editar ? (
+          {edit ? (
             <div>
               <button className="btn btn-warning m-2" onClick={updateEmployee}>
                 Actualizar
@@ -206,59 +207,11 @@ function App() {
         </div>
       </div>
 
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Nombre</th>
-            <th scope="col">Edad</th>
-            <th scope="col">Pais</th>
-            <th scope="col">Cargo</th>
-            <th scope="col">Experiencia</th>
-            <th scope="col">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {empleadosList.map((employee, key) => {
-            return (
-              <tr key={employee.id}>
-                <th scope="row">{employee.id} </th>
-                <td>{employee.nombre} </td>
-                <td>{employee.edad} </td>
-                <td>{employee.pais} </td>
-                <td>{employee.cargo} </td>
-                <td>{employee.anios} </td>
-                <td>
-                  <div
-                    className="btn-group"
-                    role="group"
-                    aria-label="Basic example"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        editEmployee(employee);
-                      }}
-                      className="btn btn-info"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        deleteEmp(employee);
-                      }}
-                      className="btn btn-danger"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <TableEmployees
+        employees={employeesList}
+        editEmployee={editEmployee}
+        deleteEmployee={deleteEmployee}
+      />
     </div>
   );
 }
